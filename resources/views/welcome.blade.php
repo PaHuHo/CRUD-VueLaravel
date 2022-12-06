@@ -19,11 +19,12 @@
 
     <link href="{{ asset('css/style.css') }}" type="text/css" rel="stylesheet" />
     <link rel="stylesheet" href="/css/app.css">
+
+
 </head>
 
 <body>
     <div id="app">
-        <!-- <api-calling></api-calling> -->
     </div>
     <script src="{{ mix('js/app.js') }}" type="text/javascript"></script>
 </body>

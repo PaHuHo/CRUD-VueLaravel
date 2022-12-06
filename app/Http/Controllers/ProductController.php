@@ -24,14 +24,13 @@ class ProductController extends Controller
         $client->index('products')->updateSearchableAttributes([
             'name',
         ]);
-        return View('welcome');
+        return View('product');
     }
 
     public function getList()
     {
         return Product::orderBy('updated_at', 'desc')->paginate(5);
     }
-
     public function search(Request $request)
     {
         // return Product::Where('name', 'LIKE', '%' . $request->name . '%')->orderBy('updated_at', 'desc')->paginate(5);

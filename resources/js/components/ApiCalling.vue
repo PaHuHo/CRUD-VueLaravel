@@ -81,7 +81,7 @@
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
-                <div :show="isOpenModel" class="alert alert-danger alert-dismissible" role="alert" v-if="error">
+                <div class="alert alert-danger alert-dismissible" role="alert" v-if="error">
                     <b>{{ error.message }}</b>
                     <ul>
                         <li v-for="(errorName, index) in error.errors" :key="index">
@@ -136,7 +136,7 @@
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
-                <div :show="isOpenModel" class="alert alert-danger alert-dismissible" role="alert" v-if="error">
+                <div  class="alert alert-danger alert-dismissible" role="alert" v-if="error">
                     <b>{{ error.message }}</b>
                     <ul>
                         <li v-for="(errorName, index) in error.errors" :key="index">
@@ -204,14 +204,13 @@ export default {
                 price: ''
             },
             selectIndex: 0,
-            isOpenModel: false
         }
     },
     created() {
         this.getListProducts()
     },
     methods: {
-        deleteSearchProduct() {
+        async deleteSearchProduct() {
             this.searchProduct.name = ''
             this.searchProduct.price = ''
             this.getSearchProduct(1, true);
@@ -274,7 +273,6 @@ export default {
 
         closeModel(index = 1) {
             this.error = null
-            this.isOpenModel = false
             if (index == 1) {
                 $('#createForm').modal('toggle');
             }
@@ -292,11 +290,10 @@ export default {
             this.selectProduct.id = product.id
             this.selectProduct.name = product.name
             this.selectProduct.price = product.price
-            this.isOpenModel = true
             console.log(this.selectProduct)
             $('#editForm').modal('show');
         },
-        deleteProduct(product, index) {
+        async deleteProduct(product, index) {
             swal({
                 title: "Nhắc nhở",
                 text: "Bạn có chắc muốn xóa sản phẩm " + product.name.toUpperCase() + " không ?",
@@ -338,7 +335,6 @@ export default {
                 // this.listProducts.data[this.selectIndex].name = response.data.product.name
                 // this.listProducts.data[this.selectIndex].price = response.data.product.price
 
-                this.isOpenModel = false
                 swal({
                     title: 'Sửa thành công',
                     type: "success",
@@ -346,8 +342,8 @@ export default {
                     showConfirmButton: false,
                     position: 'center',
                     timer: 1500,
-                });
-                this.deleteSearchProduct()
+                }).then(this.deleteSearchProduct());
+                
                 setTimeout(function () {
                     $('#editForm').modal('toggle');
 

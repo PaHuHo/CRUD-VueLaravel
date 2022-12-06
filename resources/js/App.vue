@@ -13,56 +13,54 @@ import ApiCallingVue from './components/ApiCalling.vue'
 // }
 export default {
   components: { ProductDisplay, ApiCallingVue },
-  data() {
-    return {
-      cart: [],
-      premium: true
-    }
-  },
+  // data() {
+  //   return {
+  //     cart: [],
+  //     premium: true
+  //   }
+  // },
 
-  methods: {
-    updateCart(id) {
-      this.cart.push(id)
-    }
-  }
+  // methods: {
+  //   updateCart(id) {
+  //     this.cart.push(id)
+  //   }
+  // }
 }
 </script>
 
 <template>
-  <div class="nav-bar"></div>
+  <div class="nav-bar navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid " style="padding-left:0;margin-left: 170px;">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#NavCollapse"
+        aria-controls="NavCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="NavCollapse" style="padding-left: 0;">
+        <ul class="navbar-nav">
+          <li class="nav-item d-none d-sm-inline-block">
+            <router-link to="/">Home</router-link>
+          </li>
+          <li class="nav-item d-none d-sm-inline-block">
+            <router-link to="/about">Demo</router-link>
+          </li>
+        </ul>
+      </div>
+    </div>
 
-  <ApiCallingVue></ApiCallingVue>
+  </div>
+  <!-- <ProductDisplay></ProductDisplay> -->
+  <router-view></router-view>
+  <!-- <ApiCallingVue></ApiCallingVue> -->
   <!-- <div class="cart">Cart( {{ cart.length }} )</div> -->
 
   <!-- <ProductDisplay :premium="premium" @add-to-cart="updateCart">
   </ProductDisplay> -->
 </template>
 
-<!-- <style scoped>
-header {
-  line-height: 1.5;
+<style scoped>
+.navbar-nav>li>a {
+  color: white;
+  text-decoration: none;
+  margin: 20px;
 }
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-}
-</style> -->
+</style>
