@@ -1,27 +1,5 @@
 <template>
     <div class="api-calling container mt-5">
-        <h1>Create Product</h1>
-        <div v-show="!isOpenModel" class="alert alert-danger alert-dismissible" role="alert" v-if="error">
-            <b>{{ error.message }}</b>
-            <ul>
-                <li v-for="(errorName, index) in error.errors" :key="index">
-                    {{ errorName[0] }}
-                </li>
-            </ul>
-            <button type="button" class="close" @click="error = null">
-                <span aria-hidden="true">×</span>
-            </button>
-        </div>
-        <div class="form-group">
-            <label>Name</label>
-            <input v-model="product.name" type="text" class="form-control" placeholder="Name...">
-        </div>
-        <div class="form-group">
-            <label>Price</label>
-            <input v-model="product.price" type="text" class="form-control" placeholder="Price...">
-        </div>
-        <button class="btn btn-primary" @click="createProduct">Create</button>
-        <hr>
         <h1>Search Product</h1>
         <div class="form-group">
             <label>Name</label>
@@ -31,13 +9,14 @@
             <label>Price</label>
             <input v-model="searchProduct.price" type="text" class="form-control" placeholder="Tìm kiếm giá...">
         </div>
+        <button class="btn btn-primary" @click="onClickCreate()" style="margin-right:10px">Add Product</button>
         <button class="btn btn-primary" @click="getSearchProduct()" style="margin-right:10px">Search</button>
         <button class="btn btn-success" @click="deleteSearchProduct()">Xóa search</button>
         <hr>
         <h1>List Products</h1>
         <table class="table">
             <thead>
-                <tr>
+                <tr class="table-primary" style="--bs-table-bg: #3395de; color:white">
                     <th scope="col">ID</th>
                     <th scope="col">Name</th>
                     <th scope="col">Price</th>
@@ -92,11 +71,67 @@
             </li>
         </ul> -->
         <!-- <pagination :data="listProducts" @pagination-change-page="getListProducts()"></pagination> -->
-        <div id="pagination" v-if="(listProducts.total>5)">
+        <div id="pagination" v-if="(listProducts.total > 5)">
             <pagination v-model="page" :records="Number(listProducts.total)" :per-page="Number(listProducts.per_page)"
                 @paginate="getSearchProduct(page)" />
         </div>
     </div>
+    <!-- Model Create -->
+    <div class="modal fade" id="createForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div :show="isOpenModel" class="alert alert-danger alert-dismissible" role="alert" v-if="error">
+                    <b>{{ error.message }}</b>
+                    <ul>
+                        <li v-for="(errorName, index) in error.errors" :key="index">
+                            {{ errorName[0] }}
+                        </li>
+                    </ul>
+                    <button type="button" class="close" @click="error = null" style="position: absolute;top: 10px;right: 20px;">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-header">
+                    <h5 class="modal-title">Chỉnh sửa</h5>
+                </div>
+                <div class="modal-body">
+                    <form @submit.prevent="createProduct" style="padding:10px">
+                        <!-- <div class="form-group">
+                            <label>Name</label>
+                            <input v-model="product.name" type="text" class="form-control" placeholder="Name...">
+                        </div>
+                        <div class="form-group">
+                            <label>Price</label>
+                            <input v-model="product.price" type="text" class="form-control" placeholder="Price...">
+                        </div>
+                        <button class="btn btn-primary" @click="createProduct">Create</button> -->
+                        <div class="form-group row">
+                            <label for="name" class="col-sm-2 col-form-label">Tên</label>
+                            <div class="col">
+                                <input v-model="product.name" type="text" class="form-control"
+                                    placeholder="Nhập tên...">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="price" class="col-sm-2 col-form-label">Giá</label>
+                            <div class="col">
+                                <input v-model="product.price" type="text" class="form-control"
+                                    placeholder="Nhập giá...">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col" style="display: flex;justify-content: flex-end;">
+                                <button type="button" class="btn btn-secondary" @click="closeModel(1)">Hủy</button>
+                                <button type="submit" class="btn btn-danger" style="margin-left:20px">Lưu</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Model Update -->
     <div class="modal fade" id="editForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -108,7 +143,7 @@
                             {{ errorName[0] }}
                         </li>
                     </ul>
-                    <button type="button" class="close" @click="error = null">
+                    <button type="button" class="close" @click="error = null" style="position: absolute;top: 10px;right: 20px;">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
@@ -133,7 +168,7 @@
                         </div>
                         <div class="form-group row">
                             <div class="col" style="display: flex;justify-content: flex-end;">
-                                <button type="button" class="btn btn-secondary" @click="closeModel">Hủy</button>
+                                <button type="button" class="btn btn-secondary" @click="closeModel(2)">Hủy</button>
                                 <button type="submit" class="btn btn-danger" style="margin-left:20px">Lưu</button>
                             </div>
                         </div>
@@ -177,9 +212,9 @@ export default {
     },
     methods: {
         deleteSearchProduct() {
-            this.searchProduct.name=''
-            this.searchProduct.price=''
-            this.getSearchProduct(1,true);
+            this.searchProduct.name = ''
+            this.searchProduct.price = ''
+            this.getSearchProduct(1, true);
         },
         async createProduct() {
             try {
@@ -198,7 +233,7 @@ export default {
                     name: '',
                     price: 0
                 }
-                
+
                 swal({
                     title: 'Thêm thành công',
                     type: "success",
@@ -208,6 +243,10 @@ export default {
                     timer: 1500,
                 });
                 this.deleteSearchProduct()
+                setTimeout(function () {
+                    $('#createForm').modal('toggle');
+
+                }, 1500);
             } catch (error) {
                 this.error = error.response.data
             }
@@ -220,23 +259,32 @@ export default {
                 this.error = error.response.data
             }
         },
-        async getSearchProduct(page = 1,wantBack=false) {
+        async getSearchProduct(page = 1, wantBack = false) {
             try {
-                
+
                 const response = await axios.get('/products/search?page=' + page + '&name=' + this.searchProduct.name + '&price=' + this.searchProduct.price)
                 this.listProducts = response.data
-                if(wantBack){
-                     this.page=1
+                if (wantBack) {
+                    this.page = 1
                 }
             } catch (error) {
                 this.error = error.response.data
             }
         },
-        
-        closeModel() {
+
+        closeModel(index = 1) {
             this.error = null
             this.isOpenModel = false
-            $('#editForm').modal('toggle');
+            if (index == 1) {
+                $('#createForm').modal('toggle');
+            }
+            if (index == 2) {
+                $('#editForm').modal('toggle');
+            }
+        },
+        onClickCreate() {
+            this.error = null
+            $('#createForm').modal('show');
         },
         onClickEdit(product, index) {
             this.error = null
@@ -263,7 +311,7 @@ export default {
                         axios.post('/products/delete/' + product.id)
                         // this.listProducts.data.splice(index, 1)
                         //this.deleteSearchProduct()
-                        
+
                         swal({
                             title: 'Xóa thành công',
                             type: "success",
@@ -302,7 +350,7 @@ export default {
                 this.deleteSearchProduct()
                 setTimeout(function () {
                     $('#editForm').modal('toggle');
-                    
+
                 }, 1500);
             } catch (error) {
                 this.error = error.response.data

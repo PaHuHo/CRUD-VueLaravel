@@ -52,16 +52,6 @@ class ProductController extends Controller
             return $index->search($query, $options);
         })->paginate(5)->appends($request->except(['page', '_token']));
     }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-    }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -70,10 +60,17 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
+        $messages = [
+            'name.required' => 'Vui lòng nhập tên',
+            'name.min'=> 'Tên phải hơn 5 ký tự',
+            'price.min' => 'Vui lòng nhập giá',
+            'price.numeric' => 'Giá phải là số',
+            'price.gt' => 'Giá phải lớn hơn 0',
+        ];
         $this->validate($request, [
             'name' => 'required|min:5',
             'price' => 'required|numeric|gt:0',
-        ]);
+        ],$messages);
         $product = Product::create([
             'name'     => $request->input('name'),
             'price'    => $request->input('price'),
@@ -81,26 +78,6 @@ class ProductController extends Controller
         return response([
             'product' => $product
         ], 200);
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
     }
 
     /**
@@ -112,10 +89,17 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $messages = [
+            'name.required' => 'Vui lòng nhập tên',
+            'name.min'=> 'Tên phải hơn 5 ký tự',
+            'price.min' => 'Vui lòng nhập giá',
+            'price.numeric' => 'Giá phải là số',
+            'price.gt' => 'Giá phải lớn hơn 0',
+        ];
         $this->validate($request, [
             'name' => 'required|min:5',
             'price' => 'required|numeric|gt:0',
-        ]);
+        ],$messages);
 
         $product = Product::find($id);
 
