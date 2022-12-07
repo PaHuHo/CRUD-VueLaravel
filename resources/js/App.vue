@@ -1,7 +1,8 @@
 <script>
+
 // import HelloWorld from './components/HelloWorld.vue'
 // import TheWelcome from './components/TheWelcome.vue'
-import ProductDisplay from './components/ProductDisplay.vue'
+import Demo from './components/Demo.vue'
 import ApiCallingVue from './components/ApiCalling.vue'
 // import { reactive } from 'vue'
 // defineEmits(['add-to-cart'])
@@ -12,22 +13,9 @@ import ApiCallingVue from './components/ApiCalling.vue'
 //   state.cart.push(id)
 // }
 export default {
-  components: { ProductDisplay, ApiCallingVue },
-  // data() {
-  //   return {
-  //     cart: [],
-  //     premium: true
-  //   }
-  // },
-
-  // methods: {
-  //   updateCart(id) {
-  //     this.cart.push(id)
-  //   }
-  // }
+  components: { Demo, ApiCallingVue },
 }
 </script>
-
 <template>
   <div class="nav-bar navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid " style="padding-left:0;margin-left: 170px;">
@@ -48,13 +36,7 @@ export default {
     </div>
 
   </div>
-  <!-- <ProductDisplay></ProductDisplay> -->
   <router-view></router-view>
-  <!-- <ApiCallingVue></ApiCallingVue> -->
-  <!-- <div class="cart">Cart( {{ cart.length }} )</div> -->
-
-  <!-- <ProductDisplay :premium="premium" @add-to-cart="updateCart">
-  </ProductDisplay> -->
 </template>
 
 <style scoped>

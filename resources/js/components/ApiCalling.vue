@@ -14,10 +14,11 @@
         <button class="btn btn-success" @click="deleteSearchProduct()">Xóa search</button>
         <hr>
         <h1>List Products</h1>
-        <table class="table">
+        <table class="table table-image">
             <thead>
                 <tr class="table-primary" style="--bs-table-bg: #3395de; color:white">
                     <th scope="col">ID</th>
+                    <th scope="col">Hình ảnh</th>
                     <th scope="col">Name</th>
                     <th scope="col">Price</th>
                     <th scope="col">Actions</th>
@@ -26,14 +27,18 @@
             <tbody v-if="(listProducts.total > 0)">
                 <div style="display:none">{{ (i = (listProducts.current_page - 1) * listProducts.per_page + 1) }}</div>
                 <tr v-for="(product, index) in listProducts.data" :key="product.id">
-                    <th scope="row">{{ i++ }}</th>
-                    <td>
+                    <th scope="row" style="vertical-align: middle;">{{ i++ }}</th>
+                    <td class="w-25">
+                        <img :src="product.image ? product.image : 'product-img/default.png'" width="200" height="200"
+                            class="img-fluid img-thumbnail" />
+                    </td>
+                    <td style="vertical-align: middle;">
                         {{ product.name }}
                     </td>
-                    <td>
+                    <td style="vertical-align: middle;">
                         ${{ product.price }}
                     </td>
-                    <td>
+                    <td style="vertical-align: middle;">
                         <button class="btn btn-primary" @click="onClickEdit(product, index)"
                             style="margin-right:10px">Edit</button>
                         <button class="btn btn-danger" @click="deleteProduct(product, index)">Delete</button>
@@ -46,31 +51,6 @@
                 </tr>
             </tbody>
         </table>
-        <!-- <div>
-            {{ listProducts.from }} - {{ listProducts.to }} of {{ listProducts.total }}
-        </div> -->
-        <!-- <ul class="pagination">
-            <li class="page-item" :class="{ 'disabled': listProducts.prev_page_url === null }"
-                @click="listProducts.prev_page_url && getListProducts(listProducts.current_page - 1)">
-                <a class="page-link" href="#">Previous</a>
-            </li>
-            <li class="page-item" v-if="listProducts.prev_page_url"
-                @click="getListProducts(listProducts.current_page - 1)">
-                <a class="page-link" href="#">{{ listProducts.current_page - 1 }}</a>
-            </li>
-            <li class="page-item active">
-                <a class="page-link" href="#">{{ listProducts.current_page }}</a>
-            </li>
-            <li class="page-item" v-if="listProducts.next_page_url"
-                @click="getListProducts(listProducts.current_page + 1)">
-                <a class="page-link" href="#">{{ listProducts.current_page + 1 }}</a>
-            </li>
-            <li class="page-item" :class="{ 'disabled': listProducts.next_page_url === null }"
-                @click="listProducts.next_page_url && getListProducts(listProducts.current_page + 1)">
-                <a class="page-link" href="#">Next</a>
-            </li>
-        </ul> -->
-        <!-- <pagination :data="listProducts" @pagination-change-page="getListProducts()"></pagination> -->
         <div id="pagination" v-if="(listProducts.total > 5)">
             <pagination v-model="page" :records="Number(listProducts.total)" :per-page="Number(listProducts.per_page)"
                 @paginate="getSearchProduct(page)" />
@@ -88,7 +68,8 @@
                             {{ errorName[0] }}
                         </li>
                     </ul>
-                    <button type="button" class="close" @click="error = null" style="position: absolute;top: 10px;right: 20px;">
+                    <button type="button" class="close" @click="error = null"
+                        style="position: absolute;top: 10px;right: 20px;">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
@@ -96,16 +77,7 @@
                     <h5 class="modal-title">Chỉnh sửa</h5>
                 </div>
                 <div class="modal-body">
-                    <form @submit.prevent="createProduct" style="padding:10px">
-                        <!-- <div class="form-group">
-                            <label>Name</label>
-                            <input v-model="product.name" type="text" class="form-control" placeholder="Name...">
-                        </div>
-                        <div class="form-group">
-                            <label>Price</label>
-                            <input v-model="product.price" type="text" class="form-control" placeholder="Price...">
-                        </div>
-                        <button class="btn btn-primary" @click="createProduct">Create</button> -->
+                    <form @submit.prevent="createProduct" style="padding:10px" enctype="multipart/form-data">
                         <div class="form-group row">
                             <label for="name" class="col-sm-2 col-form-label">Tên</label>
                             <div class="col">
@@ -118,6 +90,13 @@
                             <div class="col">
                                 <input v-model="product.price" type="text" class="form-control"
                                     placeholder="Nhập giá...">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="name" class="col-sm-2 col-form-label">Hình ảnh</label>
+                            <div class="col">
+                                <input type="file" v-on:change="onImageChange" accept="image/*" id="file"
+                                    ref="fileInput" class="form-control">
                             </div>
                         </div>
                         <div class="form-group row">
@@ -136,14 +115,15 @@
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
-                <div  class="alert alert-danger alert-dismissible" role="alert" v-if="error">
+                <div class="alert alert-danger alert-dismissible" role="alert" v-if="error">
                     <b>{{ error.message }}</b>
                     <ul>
                         <li v-for="(errorName, index) in error.errors" :key="index">
                             {{ errorName[0] }}
                         </li>
                     </ul>
-                    <button type="button" class="close" @click="error = null" style="position: absolute;top: 10px;right: 20px;">
+                    <button type="button" class="close" @click="error = null"
+                        style="position: absolute;top: 10px;right: 20px;">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
@@ -151,6 +131,10 @@
                     <h5 class="modal-title">Chỉnh sửa</h5>
                 </div>
                 <div class="modal-body">
+                    <div>
+                        <img id="photo" :src="selectProduct.image ? selectProduct.image : 'product-img/default.png'"
+                            width="200" height="200" style="margin-left: 80px;margin-bottom: 10px;margin-top: 10px;" />
+                    </div>
                     <form @submit.prevent="updateProduct(selectIndex)" style="padding:10px">
                         <div class="form-group row">
                             <label for="name" class="col-sm-2 col-form-label">Tên</label>
@@ -164,6 +148,14 @@
                             <div class="col">
                                 <input type="number" class="form-control" v-model="selectProduct.price" name="price"
                                     placeholder="Nhập giá">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="name" class="col-sm-2 col-form-label">Hình ảnh</label>
+                            <div class="col">
+                                <input type="file" v-on:change="onImageChange" id="file" ref="fileInput"
+                                    class="form-control" accept="image/*"
+                                    onchange="document.getElementById('photo').src = window.URL.createObjectURL(this.files[0])">
                             </div>
                         </div>
                         <div class="form-group row">
@@ -182,28 +174,29 @@
 <script>
 
 export default {
-    // components:{
-    //     'Pagination': pagination
-    // },
     data() {
         return {
+            image: '',
             page: 1,
             product: {
                 name: '',
-                price: 0
+                price: 0,
             },
             listProducts: {},
             error: null,
             selectProduct: {
                 id: '',
                 name: '',
-                price: 0
+                price: 0,
+                image: '',
             },
             searchProduct: {
                 name: '',
                 price: ''
             },
             selectIndex: 0,
+
+
         }
     },
     created() {
@@ -218,21 +211,18 @@ export default {
         async createProduct() {
             try {
                 this.error = null
+
                 const response = await axios.post('/products/create', {
                     name: this.product.name,
-                    price: this.product.price
+                    price: this.product.price,
+                    image: this.image
                 })
-                // this.listProducts.data.unshift({
-                //     ...response.data.product,
-                //     isEdit: false
-                // })
-
+                await this.deleteSearchProduct()
                 // reset giá trị form về ban đầu
                 this.product = {
                     name: '',
                     price: 0
                 }
-
                 swal({
                     title: 'Thêm thành công',
                     type: "success",
@@ -240,12 +230,11 @@ export default {
                     showConfirmButton: false,
                     position: 'center',
                     timer: 1500,
-                });
-                this.deleteSearchProduct()
+                })
                 setTimeout(function () {
                     $('#createForm').modal('toggle');
-
                 }, 1500);
+
             } catch (error) {
                 this.error = error.response.data
             }
@@ -282,19 +271,22 @@ export default {
         },
         onClickCreate() {
             this.error = null
+            this.reset()
             $('#createForm').modal('show');
         },
         onClickEdit(product, index) {
             this.error = null
+            this.reset()
             this.selectIndex = index
             this.selectProduct.id = product.id
             this.selectProduct.name = product.name
             this.selectProduct.price = product.price
+            this.selectProduct.image = product.image
             console.log(this.selectProduct)
             $('#editForm').modal('show');
         },
         async deleteProduct(product, index) {
-            swal({
+            await swal({
                 title: "Nhắc nhở",
                 text: "Bạn có chắc muốn xóa sản phẩm " + product.name.toUpperCase() + " không ?",
                 type: "warning",
@@ -329,9 +321,10 @@ export default {
             try {
                 const response = await axios.post('/products/update/' + this.selectProduct.id, {
                     name: this.selectProduct.name,
-                    price: this.selectProduct.price
-                })
-
+                    price: this.selectProduct.price,
+                    image: this.image
+                },)
+                await this.deleteSearchProduct()
                 // this.listProducts.data[this.selectIndex].name = response.data.product.name
                 // this.listProducts.data[this.selectIndex].price = response.data.product.price
 
@@ -342,8 +335,7 @@ export default {
                     showConfirmButton: false,
                     position: 'center',
                     timer: 1500,
-                }).then(this.deleteSearchProduct());
-                
+                })
                 setTimeout(function () {
                     $('#editForm').modal('toggle');
 
@@ -352,6 +344,26 @@ export default {
                 this.error = error.response.data
             }
         },
+        async onImageChange(e) {
+            let files = e.target.files || e.dataTransfer.files;
+            if (!files.length)
+                return;
+            this.createImage(files[0]);
+        },
+        async createImage(file) {
+            let reader = new FileReader();
+            reader.onload = (e) => {
+                this.image = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        },
+
+        reset() {
+            this.image = ''
+            const input = this.$refs.fileInput
+            input.type = 'text'
+            input.type = 'file'
+        }
     }
 }
 </script>
@@ -364,6 +376,10 @@ export default {
 .pagination>li>button {
     width: 30px;
     height: 30px;
+}
+
+.table-primary th {
+    text-align: center;
 }
 </style>
  
