@@ -25,7 +25,7 @@ Route::post('/products/update/{id}', [ProductController::class,'update']);
 Route::post('/products/delete/{id}', [ProductController::class,'destroy']);
 Route::get('/products/get-list', [ProductController::class,'getList']);
 Route::get('/products/search', [ProductController::class,'search']);
-
+Route::get('/products/export', [ProductController::class, 'export'])->name("export-products");
 
 
 

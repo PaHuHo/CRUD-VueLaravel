@@ -1,5 +1,16 @@
 <template>
     <div class="api-calling container mt-5">
+        <div class="alert alert-danger alert-dismissible" role="alert" v-if="error">
+            <b>{{ error.message }}</b>
+            <ul>
+                <li v-for="(errorName, index) in error.errors" :key="index">
+                    {{ errorName[0] }}
+                </li>
+            </ul>
+            <button type="button" class="close" @click="error = null" style="position: absolute;top: 10px;right: 20px;">
+                <span aria-hidden="true">×</span>
+            </button>
+        </div>
         <h1>Search Product</h1>
         <div class="form-group">
             <label>Name</label>
@@ -10,7 +21,8 @@
             <input v-model="searchProduct.price" type="text" class="form-control" placeholder="Tìm kiếm giá...">
         </div>
         <button class="btn btn-primary" @click="onClickCreate()" style="margin-right:10px">Add Product</button>
-        <button class="btn btn-primary" @click="getSearchProduct()" style="margin-right:10px">Search</button>
+        <button class="btn btn-primary" @click="exportExcel()" style="margin-right:10px">Export</button>
+        <button class="btn btn-primary" @click="getSearchProduct(1,true)" style="margin-right:10px">Search</button>
         <button class="btn btn-success" @click="deleteSearchProduct()">Xóa search</button>
         <hr>
         <h1>List Products</h1>
@@ -77,6 +89,10 @@
                     <h5 class="modal-title">Chỉnh sửa</h5>
                 </div>
                 <div class="modal-body">
+                    <div>
+                        <img id="photoCreate" src="product-img/default.png"
+                            width="200" height="200" style="margin-left: 80px;margin-bottom: 10px;margin-top: 10px;" />
+                    </div>
                     <form @submit.prevent="createProduct" style="padding:10px" enctype="multipart/form-data">
                         <div class="form-group row">
                             <label for="name" class="col-sm-2 col-form-label">Tên</label>
@@ -95,7 +111,8 @@
                         <div class="form-group row">
                             <label for="name" class="col-sm-2 col-form-label">Hình ảnh</label>
                             <div class="col">
-                                <input type="file" v-on:change="onImageChange" accept="image/*" id="file"
+                                <input type="file" v-on:change="onImageChange" accept="image/*"
+                                    onchange="document.getElementById('photoCreate').src = window.URL.createObjectURL(this.files[0])" id="file"
                                     ref="fileInput" class="form-control">
                             </div>
                         </div>
@@ -363,6 +380,19 @@ export default {
             const input = this.$refs.fileInput
             input.type = 'text'
             input.type = 'file'
+        },
+        async exportExcel() {
+            try {
+                // const response = await axios.get('/products/export?page=' + page + '&name=' + this.searchProduct.name + '&price=' + this.searchProduct.price)
+                var query = {
+                    name: this.searchProduct.name,
+                    price: this.searchProduct.price,
+                }
+                    var url = "/products/export?" + $.param(query);
+                window.location = url;
+            } catch (error) {
+                this.error = error.response.data
+            }
         }
     }
 }

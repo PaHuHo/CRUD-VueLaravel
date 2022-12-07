@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-
+use App\Exports\ProductExport;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use MeiliSearch\Client;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManagerStatic as Image;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProductController extends Controller
 {
@@ -46,6 +47,8 @@ class ProductController extends Controller
         $client->index('products')->updateSortableAttributes([
             'updated_at',
         ]);
+        $client->index('products')->resetDisplayedAttributes();
+        
         $client->index('products')->updateFilterableAttributes(['price']);
         $client->index('products')->updateSearchableAttributes([
             'name',
@@ -68,12 +71,18 @@ class ProductController extends Controller
         //     });
         // })->orderBy('updated_at', 'desc')->paginate(5)->appends($request->except(['page', '_token']));
 
-        return Product::search($request->name, function ($index, $query, $options) use ($request) {
+        return Product::search(" ", function ($index, $query, $options) use ($request) {
             $options['sort'] = ['updated_at:desc'];
-            if (isset($request->price)) {
-                $options['filter'] = '(price=' . $request->price . ')';
+            if (isset($request->name)) {
+                if (isset($request->price)) {
+                    $options['filter'] = "(price =" . $request->price . ")";
+                }
+                return $index->search($request->name, $options);
             }
-
+            
+            if (isset($request->price)) {
+                $options['filter'] = "(price =" . $request->price . ")";
+            }
             return $index->search($query, $options);
         })->paginate(5)->appends($request->except(['page', '_token']));
     }
@@ -101,10 +110,9 @@ class ProductController extends Controller
         $product->name = $request->input('name');
         $product->price = $request->input('price');
         if ($request->get('image')) {
-            $first = strtoupper(substr($this->vn_str_filter($request->input('name')), 0, 1));
-            $count = Product::where('name', 'LIKE', $first . '%')->count();
             $image = $request->get('image');
-            $name = ($first . substr("000000000", strlen($count + 1)) . ($count + 1)).'.' . explode('/', explode(':', substr($image, 0, strpos($image, ';')))[1])[1];
+            $first = strtoupper(substr($this->vn_str_filter($request->input('name')), 0, 1));
+            $name = ($first . substr("000000000", strlen($count + 1)) . ($count + 1)) . '.' . explode('/', explode(':', substr($image, 0, strpos($image, ';')))[1])[1];
             $resized_img = Image::make($image)->resize(512, 512)->stream();
             Storage::disk('public')->put('product-img/' . $name, $resized_img);
             $product->image = "product-img/" . $name;
@@ -140,16 +148,22 @@ class ProductController extends Controller
 
         $product->name = $request->input('name');
         $product->price = $request->input('price');
+        
         if ($request->get('image')) {
-            if (file_exists(public_path(). '/' . $product->image)) {
-                @unlink(public_path() . '/' . $product->image,);
-            }
-            
+           
             $image = $request->get('image');
-            $name = $product->id.'.' . explode('/', explode(':', substr($image, 0, strpos($image, ';')))[1])[1];
+            if($product->image){
+                if (file_exists(public_path() . '/' . $product->image)) {
+                    @unlink(public_path() . '/' . $product->image,);
+                }
+                $name = explode('/',explode('.',$product->image)[0])[1] . '.' . explode('/', explode(':', substr($image, 0, strpos($image, ';')))[1])[1];
+            }else{
+                $first = strtoupper(substr($this->vn_str_filter($request->input('name')), 0, 1));
+                $name = ($first . substr("000000000", strlen($product->id)) . ($product->id)) . '.' . explode('/', explode(':', substr($image, 0, strpos($image, ';')))[1])[1];
+            }
             $resized_img = Image::make($image)->resize(512, 512)->stream();
-            Storage::disk('public')->put("product-img/".$name, $resized_img);
-            $product->image =  "product-img/".$name;
+            Storage::disk('public')->put("product-img/" . $name, $resized_img);
+            $product->image =  "product-img/" . $name;
         }
         $product->save();
 
@@ -167,8 +181,8 @@ class ProductController extends Controller
     public function destroy($id)
     {
         $product = Product::find($id);
-        if($product->image){
-            if (file_exists(public_path(). '/' . $product->image)) {
+        if ($product->image) {
+            if (file_exists(public_path() . '/' . $product->image)) {
                 @unlink(public_path() . '/' . $product->image,);
             }
         }
@@ -176,5 +190,25 @@ class ProductController extends Controller
         return response([
             'message' => 'Xóa thành công'
         ], 200);
+    }
+
+    public function export(Request $request)
+    {
+        $listProduct = null;
+        if (!$request->filled('name') && !$request->filled('price')) {
+            $listProduct = Product::orderBy('updated_at', 'desc')->skip(0)->take(20)->get();
+        } else {
+            $listProduct=Product::search($request->name, function ($index, $query, $options) use ($request) {
+                $options['sort'] = ['updated_at:desc'];
+                if (isset($request->price)) {
+                    $options['filter'] = '(price=' . $request->price . ')';
+                }
+                return $index->search($query, $options);
+            })->get();
+        }
+        if ($listProduct->count() == 0) {
+            return redirect()->back()->with('fail-export', 'Không có dữ liệu để export');
+        }
+        return Excel::download(new ProductExport($listProduct), 'product-' . time() . '.xls');
     }
 }
