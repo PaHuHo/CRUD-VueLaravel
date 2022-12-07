@@ -36,7 +36,6 @@ class ProductSeeder extends Seeder
             $product = new Product();
             $product->name = $this->faker->name;
             $product->price = $this->faker->randomNumber(2).'00';
-
             $product->save();
         }
     }

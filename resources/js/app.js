@@ -15,7 +15,7 @@ import HomeComponent from './components/HomeComponent.vue';
 import CreateComponent from './components/CreateComponent.vue';
 import IndexComponent from './components/IndexComponent.vue';
 import Product from './components/ApiCalling.vue';
-import About from './components/ProductDisplay.vue';
+import About from './components/Demo.vue';
 
 const VueRouter = require('vue-router');
 const routes = [

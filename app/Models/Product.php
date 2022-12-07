@@ -11,6 +11,6 @@ class Product extends Model
     use HasFactory,Searchable;
     protected $table = 'products';
     protected $fillable = [
-    	'name', 'price'
+    	'name', 'price', 'image'
     ];
 }

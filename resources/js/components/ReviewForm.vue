@@ -20,25 +20,27 @@ export default {
           confirmButtonText: "Ok",
           closeOnConfirm: true,
         })
+      } else {
+        let productReview = {
+          name: this.name,
+          review: this.review,
+          rating: this.rating,
+        }
+        this.$emit('review-submitted', productReview)
+
+        this.name = ''
+        this.review = ''
+        this.rating = null
       }
 
-      let productReview = {
-        name: this.name,
-        review: this.review,
-        rating: this.rating,
-      }
-      this.$emit('review-submitted', productReview)
 
-      this.name = ''
-      this.review = ''
-      this.rating = null
     }
   }
 }
 </script>
 
 <template>
-  <form class="review-form" @submit.prevent="onSubmit">  
+  <form class="review-form" @submit.prevent="onSubmit">
     <h3>Leave a review</h3>
 
     <label for="name">Name:</label>
@@ -47,7 +49,7 @@ export default {
     <input id="name" v-model="name">
 
     <label for="review">Review:</label>
-    <textarea   id="review" v-model="review"></textarea>
+    <textarea id="review" v-model="review"></textarea>
 
     <label for="rating">Rating:</label>
     <select id="rating" v-model.number="rating">
