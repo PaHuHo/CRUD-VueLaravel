@@ -1,4 +1,5 @@
 <template>
+    <NavBarVue></NavBarVue>
     <div class="api-calling container mt-5">
         <div class="alert alert-danger alert-dismissible" role="alert" v-if="error">
             <b>{{ error.message }}</b>
@@ -22,7 +23,7 @@
         </div>
         <button class="btn btn-primary" @click="onClickCreate()" style="margin-right:10px">Add Product</button>
         <button class="btn btn-primary" @click="exportExcel()" style="margin-right:10px">Export</button>
-        <button class="btn btn-primary" @click="getSearchProduct(1,true)" style="margin-right:10px">Search</button>
+        <button class="btn btn-primary" @click="getSearchProduct(1, true)" style="margin-right:10px">Search</button>
         <button class="btn btn-success" @click="deleteSearchProduct()">Xóa search</button>
         <hr>
         <h1>List Products</h1>
@@ -90,8 +91,8 @@
                 </div>
                 <div class="modal-body">
                     <div>
-                        <img id="photoCreate" src="product-img/default.png"
-                            width="200" height="200" style="margin-left: 80px;margin-bottom: 10px;margin-top: 10px;" />
+                        <img id="photoCreate" src="product-img/default.png" width="200" height="200"
+                            style="margin-left: 80px;margin-bottom: 10px;margin-top: 10px;" />
                     </div>
                     <form @submit.prevent="createProduct" style="padding:10px" enctype="multipart/form-data">
                         <div class="form-group row">
@@ -112,8 +113,8 @@
                             <label for="name" class="col-sm-2 col-form-label">Hình ảnh</label>
                             <div class="col">
                                 <input type="file" v-on:change="onImageChange" accept="image/*"
-                                    onchange="document.getElementById('photoCreate').src = window.URL.createObjectURL(this.files[0])" id="file"
-                                    ref="fileInput" class="form-control">
+                                    onchange="document.getElementById('photoCreate').src = window.URL.createObjectURL(this.files[0])"
+                                    id="file" ref="fileInput" class="form-control">
                             </div>
                         </div>
                         <div class="form-group row">
@@ -189,8 +190,9 @@
 </template>
  
 <script>
-
+import NavBarVue from './NavBar.vue'
 export default {
+    components: { NavBarVue },
     data() {
         return {
             image: '',
@@ -216,7 +218,14 @@ export default {
 
         }
     },
+    // mounted() {
+    //     this.axios.get('/api/user').then((res) => {
+    //         console.log(res.data)
+    //         this.user = res.data
+    //     })
+    // },
     created() {
+
         this.getListProducts()
     },
     methods: {
@@ -229,7 +238,7 @@ export default {
             try {
                 this.error = null
 
-                const response = await axios.post('/products/create', {
+                const response = await axios.post('/api/products/create', {
                     name: this.product.name,
                     price: this.product.price,
                     image: this.image
@@ -258,16 +267,20 @@ export default {
         },
         async getListProducts(page = 1) {
             try {
-                const response = await axios.get('/products/get-list?page=' + page)
+                const response = await axios.get('/api/products/get-list?page=' + page)
                 this.listProducts = response.data
             } catch (error) {
                 this.error = error.response.data
+                 if (errors.response.status === 401) {
+                    // localStorage.removeItem('token')
+                    this.$router.push({ name: "login" });
+                }
             }
         },
         async getSearchProduct(page = 1, wantBack = false) {
             try {
 
-                const response = await axios.get('/products/search?page=' + page + '&name=' + this.searchProduct.name + '&price=' + this.searchProduct.price)
+                const response = await axios.get('/api/products/search?page=' + page + '&name=' + this.searchProduct.name + '&price=' + this.searchProduct.price)
                 this.listProducts = response.data
                 if (wantBack) {
                     this.page = 1
@@ -314,7 +327,7 @@ export default {
             }).then(isConfirmed => {
                 if (isConfirmed) {
                     try {
-                        axios.post('/products/delete/' + product.id)
+                        axios.post('/api/products/delete/' + product.id)
                         // this.listProducts.data.splice(index, 1)
                         //this.deleteSearchProduct()
 
@@ -336,7 +349,7 @@ export default {
         async updateProduct(index) {
             console.log(index);
             try {
-                const response = await axios.post('/products/update/' + this.selectProduct.id, {
+                const response = await axios.post('/api/products/update/' + this.selectProduct.id, {
                     name: this.selectProduct.name,
                     price: this.selectProduct.price,
                     image: this.image
@@ -383,12 +396,12 @@ export default {
         },
         async exportExcel() {
             try {
-                // const response = await axios.get('/products/export?page=' + page + '&name=' + this.searchProduct.name + '&price=' + this.searchProduct.price)
+                // const response = await axios.get('/api/products/export?page=' + page + '&name=' + this.searchProduct.name + '&price=' + this.searchProduct.price)
                 var query = {
                     name: this.searchProduct.name,
                     price: this.searchProduct.price,
                 }
-                    var url = "/products/export?" + $.param(query);
+                var url = "/api/products/export?" + $.param(query);
                 window.location = url;
             } catch (error) {
                 this.error = error.response.data
@@ -399,6 +412,12 @@ export default {
 </script>
 
 <style>
+.navbar-nav>li>a {
+    color: white;
+    text-decoration: none;
+    margin: 20px;
+}
+
 .pagination {
     display: inline-flex;
 }
@@ -412,4 +431,3 @@ export default {
     text-align: center;
 }
 </style>
- 

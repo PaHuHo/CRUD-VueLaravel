@@ -1,7 +1,8 @@
 <script>
 import ProductDisplay from './ProductDisplay.vue'
+import NavBarVue from './NavBar.vue'
 export default {
-  components: { ProductDisplay },
+  components: { ProductDisplay,NavBarVue },
   data() {
     return {
       cart: [],
@@ -18,6 +19,8 @@ export default {
 </script>
 
 <template>
+  <NavBarVue></NavBarVue>
+   
   <div class="cart">Cart( {{ cart.length }} )</div>
 
   <ProductDisplay :premium="premium" @add-to-cart="updateCart">
