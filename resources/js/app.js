@@ -1,56 +1,66 @@
 // app.js
-import { createApp } from 'vue'
-require('./bootstrap');
+import { createApp, nextTick } from "vue";
+require("./bootstrap");
 // import Vue from 'vue/dist/vue';
 // import VueRouter from './router';
 // Vue.use(require('vue-router'));
 
-import VueAxios from 'vue-axios';
-import axios from 'axios';
+import VueAxios from "vue-axios";
+import axios from "axios";
 
-import App from './App.vue';
+import App from "./App.vue";
 //import LaravelVuePagination from  'laravel-vue-pagination';
-import Pagination from 'v-pagination-3';
-import HomeComponent from './components/HomeComponent.vue';
-import CreateComponent from './components/CreateComponent.vue';
-import IndexComponent from './components/IndexComponent.vue';
-import Product from './components/ApiCalling.vue';
-import About from './components/Demo.vue';
+import Pagination from "v-pagination-3";
+import Product from "./components/ApiCalling.vue";
+import About from "./components/Demo.vue";
+import Login from "./components/Login.vue";
 
-const VueRouter = require('vue-router');
+const VueRouter = require("vue-router");
 const routes = [
-    { name: 'home', path: '/', component: Product },
-    {  name: 'about', path: '/about', component: About },
-  ]
-  const router = VueRouter.createRouter({
-    // 4. Provide the history implementation to use. We are using the hash history for simplicity here.
-    history: VueRouter.createWebHashHistory(),
+    { name: "home", path: "/", component: Product ,meta:{
+        requiresAuth:true
+    }},
+    { name: "about", path: "/about", component: About,meta:{
+        requiresAuth:true
+    }},
+    { name: "login", path: "/login", component: Login,meta:{
+        requiresAuth:false
+    } },
+];
+const router = VueRouter.createRouter({
+    // 4. Provide the history implementation to use. We are using the html5 history for simplicity here.
+    history: VueRouter.createWebHistory(),
     routes, // short for `routes: routes`
-  })
-// const routes = [
-//   {
-//       name: 'home',
-//       path: '/',
-//       component: HomeComponent
-//   },
-//   {
-//       name: 'create',
-//       path: '/create',
-//       component: CreateComponent
-//   },
-//   {
-//       name: 'posts',
-//       path: '/posts',
-//       component: IndexComponent
-//   },
-// ];
-
-// const router = new VueRouter({ mode: 'history', routes: routes});
-// console.log(router);
-
+});
+router.beforeEach((to, from,next)=>{
+    if(to.meta.requiresAuth && !localStorage.getItem('token')){          
+        return next({path:'/login'})
+    }else if(!to.meta.requiresAuth && localStorage.getItem('token')){
+        return next({path:'/'})
+    }else{
+        next()
+    }
+});
+// router.beforeEach((to, from, next)=>{
+//     if(to.matched.some(record=>record.meta.requiresAuth)){          
+//         if(!localStorage.getItem('token')){
+//             return {name:'login'}
+//         }else{
+//             next()
+//         }
+//     }else if(to.matched.some(record=>record.meta.guest)){
+//         if(localStorage.getItem('token')){
+//             return {name:'home'}
+//         }else{
+//             next()
+//         }
+//     }else{
+//         next()
+//     }
+// });
 const app = createApp(App);
-app.use(router)
-app.use(VueAxios,axios)
-app.component('pagination', Pagination);
-app.mount('#app');
-// app.component('pagination', require('laravel-vue-pagination')); 
+app.use(router);
+app.use(VueAxios, axios);
+app.component("pagination", Pagination);
+app.mount("#app");
+// app.component('pagination', require('laravel-vue-pagination'));
